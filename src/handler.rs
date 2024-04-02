@@ -12,7 +12,7 @@ pub struct Function {
     properties: Vec<String>,
     pub methods: Option<Vec<String>>,
     pub function: Arc<
-        dyn (Fn(&server::HTMLRequest, &cache::Cache) -> Result<String, std::io::Error>) + Send + Sync
+        dyn (FnMut(&server::HTMLRequest, &mut cache::Cache) -> Result<String, std::io::Error>) + Send + Sync
     >,
     description: Option<String>,
 }
@@ -25,7 +25,7 @@ impl Function {
         methods: Option<Vec<String>>,
         description: Option<String>,
         function: Arc<
-            dyn (Fn(&server::HTMLRequest, &cache::Cache) -> Result<String, std::io::Error>) + Send + Sync
+            dyn (FnMut(&server::HTMLRequest, &mut cache::Cache) -> Result<String, std::io::Error>) + Send + Sync
         >
     ) -> Function {
         Function {
@@ -46,7 +46,7 @@ impl Function {
         methods: Option<Vec<&str>>,
         description: Option<&str>,
         function: Arc<
-            dyn (Fn(&server::HTMLRequest, &cache::Cache) -> Result<String, std::io::Error>) + Send + Sync
+            dyn (FnMut(&server::HTMLRequest, &mut cache::Cache) -> Result<String, std::io::Error>) + Send + Sync
         >
     ) -> Function {
         Function {
@@ -103,11 +103,11 @@ impl FuncHelper {
         &self
     ) -> HashMap<
         String,
-        Arc<dyn (Fn(&server::HTMLRequest, &cache::Cache) -> Result<String, std::io::Error>) + Send + Sync>
+        Arc<dyn (FnMut(&server::HTMLRequest, &mut cache::Cache) -> Result<String, std::io::Error>) + Send + Sync>
     > {
         let mut map: HashMap<
             String,
-            Arc<dyn (Fn(&server::HTMLRequest, &cache::Cache) -> Result<String, std::io::Error>) + Send + Sync>
+            Arc<dyn (FnMut(&server::HTMLRequest, &mut cache::Cache) -> Result<String, std::io::Error>) + Send + Sync>
         > = HashMap::new();
         for function in self.store.iter() {
             map.insert(function.key.clone(), Arc::clone(&function.function));
@@ -205,7 +205,7 @@ impl FuncHelper {
     }
 }
 
-fn add(request: &server::HTMLRequest, cache: &cache::Cache) -> Result<String, std::io::Error> {
+fn add(request: &server::HTMLRequest, cache: &mut cache::Cache) -> Result<String, std::io::Error> {
     cache.add_float("test", 6.4);
     Ok(String::from("Added float."))
 }

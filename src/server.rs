@@ -386,7 +386,7 @@ impl HTTPServer {
                     }
                 };
 
-                if let Some(func) = arc_clone.read().unwrap().get(&request.endpoint.to_owned()) {
+                if let Some(func) = arc_clone.write().unwrap().get(&request.endpoint.to_owned()) {
                     let methods = match &func.methods {
                         Some(methods) => methods.clone(),
                         None => vec![
@@ -405,7 +405,7 @@ impl HTTPServer {
                     if methods.contains(&request.method) {
                         // Execute the Fn(Request) method
                         // function is a property containing the Arc<dyn Fn(request)> function,
-                        match func.function.as_ref()(&request, &cache_clone.read().unwrap()) {
+                        match func.function.as_ref()(&request, &mut cache_clone.write().unwrap()) {
                             Ok(_msg) =>
                                 /*println!("Got message: {}", _msg)*/
                                 {}
